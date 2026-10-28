@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>SE Primer — 08:00, Randevu Sistemi Çöktü</title>
+  
+  <!-- Inter Font & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            appBg: 'var(--app-bg)',
+            appSurface: 'var(--app-surface)',
+            appSurfaceHigh: 'var(--app-surface-high)',
+            appBorder: 'var(--app-border)',
+            appText: 'var(--app-text)',
+            appMuted: 'var(--app-muted)',
+            appYellow: 'var(--app-yellow)',
+            appMint: '#4ADE9A',
+            appMercan: '#FF6B5B'
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          },
+          boxShadow: {
+            'glow-yellow': '0 0 25px -2px rgba(255, 230, 0, 0.55)',
+            'glow-mint': '0 0 20px -3px rgba(74, 222, 154, 0.45)',
+            'glow-mercan': '0 0 20px -3px rgba(255, 107, 91, 0.45)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* ======================================================== */
+    /* RENK PALETİ & TEMA DEĞİŞKENLERİ                          */
+    /* ======================================================== */
+    :root {
+      /* GECE MODU (VARSAYILAN): Lacivert zemin + Canlı Açık Sarı Butonlar */
+      --body-outer-bg: #071129;
+      --app-bg: #0B1B3F;
+      --app-surface: #14285A;
+      --app-surface-high: #1E3574;
+      --app-border: #2A3F73;
+      --app-text: #FFFFFF;
+      --app-muted: #A9B6D3;
+      --app-yellow: #FFE600; /* Çok canlı, açık, parlak sarı */
+      --app-yellow-hover: #FFF170;
+      --app-yellow-glow: rgba(255, 230, 0, 0.5);
+
+      /* Buton Stilleri */
+      --btn-main-bg: #FFE600;
+      --btn-main-text: #0B1B3F;
+      --choice-btn-bg: #14285A;
+      --choice-btn-text: #FFFFFF;
+      --choice-border: #2A3F73;
+      --header-bg: rgba(20, 40, 90, 0.6);
+      --card-bg-subtle: rgba(11, 27, 63, 0.7);
+    }
+
+    body.theme-light {
+      /* GÜNDÜZ MODU: Açık Sarı Arka Plan + Lacivert Butonlar & Kartlar */
+      --body-outer-bg: #F5E6A3;
+      --app-bg: #FFF8CC; /* Açık ve aydınlık canlı sarı zemin */
+      --app-surface: #FFF0A3; /* Tatlı açık sarı kart yüzeyi */
+      --app-surface-high: #FFE77D;
+      --app-border: #E8D066;
+      --app-text: #0B1B3F; /* Gündüz metinleri lacivert buton rengiyle aynı */
+      --app-muted: #43547A; /* Koyu lacivert ara metinler */
+      --app-yellow: #0B1B3F; /* Gündüz modunda vurgu lacivert */
+      --app-yellow-hover: #14285A;
+      --app-yellow-glow: rgba(11, 27, 63, 0.25);
+
+      /* Butonlar: Lacivert zemin + Canlı Sarı yazı */
+      --btn-main-bg: #0B1B3F;
+      --btn-main-text: #FFE600;
+      --choice-btn-bg: #0B1B3F;
+      --choice-btn-text: #FFFFFF;
+      --choice-border: #0B1B3F;
+      --header-bg: rgba(255, 240, 163, 0.8);
+      --card-bg-subtle: rgba(255, 255, 255, 0.5);
+    }
+
+    body.theme-light [class~="text-[#FFE600]"] {
+      color: var(--app-yellow);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+
+    body {
+      background-color: var(--body-outer-bg);
+      color: var(--app-text);
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100dvh;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    .pb-safe { padding-bottom: max(1.2rem, env(safe-area-inset-bottom)); }
+    .pt-safe { padding-top: max(1rem, env(safe-area-inset-top)); }
+    
+    .screen-fade {
+      animation: slideUpFade 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes slideUpFade {
+      from { opacity: 0; transform: translateY(10px) scale(0.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Ana Aksiyon Butonu */
+    .app-main-btn {
+      background-color: var(--btn-main-bg);
+      color: var(--btn-main-text);
+      box-shadow: 0 4px 14px var(--app-yellow-glow);
+    }
+    .app-main-btn:hover {
+      filter: brightness(1.08);
+    }
+
+    /* Seçenek Kart Butonu */
+    .app-choice-card {
+      background-color: var(--choice-btn-bg);
+      color: var(--choice-btn-text);
+      border: 1.5px solid var(--choice-border);
+    }
+
+    .btn-profile-opt {
+      color: var(--app-text);
+    }
+    
+    /* Nabız Hattı Animasyonu */
+    .ekg-line {
+      stroke-dasharray: 200;
+      stroke-dashoffset: 200;
+      animation: ekgPulse 2.4s linear infinite;
+    }
+    @keyframes ekgPulse {
+      0% { stroke-dashoffset: 200; }
+      100% { stroke-dashoffset: -200; }
+    }
+
+    /* Nokta Animasyonu */
+    .dot-flashing {
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background-color: #FFE600;
+      animation: dotPulse 0.8s infinite alternate;
+    }
+    .dot-flashing:nth-child(2) { animation-delay: 0.2s; }
+    .dot-flashing:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dotPulse {
+      0% { opacity: 0.2; transform: scale(0.7); }
+      100% { opacity: 1; transform: scale(1.3); }
+    }
+
+    /* Konfeti Canvas */
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 99;
+    }
+  </style>
+</head>
+<body class="flex justify-center min-h-screen">
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Mobile Shell Container (390×844 tabanlı responsive) -->
+  <main class="w-full max-w-[420px] min-h-screen bg-appBg flex flex-col relative px-4 pt-safe pb-safe shadow-2xl border-x border-appBorder">
+
+    <!-- TOP HEADER: KONTROLLER & GECE/GÜNDÜZ MODU -->
+    <header data-cy="app-header" class="flex items-center justify-between py-2 px-2 border-b border-appBorder mb-3 rounded-xl backdrop-blur-md" style="background-color: var(--header-bg);">
+      <div class="flex items-center gap-2">
+        <div class="relative flex items-center justify-center">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#FFE600] animate-ping absolute opacity-75"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-[#FFE600] relative"></span>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-[11px] font-black tracking-widest uppercase text-appText flex items-center gap-1">
+            SE PRIMER <span class="text-[#FFE600] drop-shadow-sm font-extrabold">· 08:00</span>
+          </span>
+          <span class="text-[9px] text-appMuted flex items-center gap-1 font-mono">
+            <span class="w-1.5 h-1.5 rounded-full bg-appMint"></span> Kriz Odası
+          </span>
+        </div>
+      </div>
+      
+      <!-- Hızlı Kontroller: Tema (Gece/Gündüz) + Ses + API -->
+      <div class="flex items-center gap-1.5">
+        <!-- Gece / Gündüz Modu Butonu (data-cy="theme-toggle-btn") -->
+        <button id="themeToggleBtn" data-cy="theme-toggle-btn" onclick="toggleTheme()" title="Gece / Gündüz Modu" class="p-1.5 rounded-lg bg-appSurface text-[#FFE600] border border-appBorder hover:bg-appSurfaceHigh transition-all active:scale-95 flex items-center justify-center">
+          <span class="material-symbols-outlined text-[18px]" id="themeIcon">light_mode</span>
+        </button>
+
+        <!-- Ses Aç/Kapat Butonu (data-cy="audio-toggle-btn") -->
+        <button id="soundToggleBtn" data-cy="audio-toggle-btn" onclick="toggleSound()" title="Sesi Aç/Kapat" class="p-1.5 rounded-lg bg-appSurface text-[#FFE600] border border-appBorder hover:bg-appSurfaceHigh transition-all active:scale-95 flex items-center justify-center">
+          <span class="material-symbols-outlined text-[18px]" id="soundIcon">volume_up</span>
+        </button>
+
+        <!-- Gemini API Butonu (data-cy="api-key-toggle-btn") -->
+        <button id="apiKeyToggleBtn" data-cy="api-key-toggle-btn" onclick="toggleApiKeyModal()" class="text-[11px] text-appMuted hover:text-appText flex items-center gap-1 bg-appSurface px-2 py-1.5 rounded-lg border border-appBorder active:scale-95 transition-all">
+          <span class="material-symbols-outlined text-[15px] text-[#FFE600]">key</span>
+          <span id="apiKeyStatusText" data-cy="api-key-status" class="font-bold">API</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- GEMINI API MODAL -->
+    <div id="apiKeyModal" data-cy="api-key-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-appSurface border border-appBorder w-full max-w-sm rounded-2xl p-5 flex flex-col gap-3 shadow-2xl">
+        <div class="flex justify-between items-center">
+          <h3 class="text-sm font-black text-[#FFE600] flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-base">smart_toy</span> Gemini Sokratik Model
+          </h3>
+          <button data-cy="api-key-modal-close-btn" onclick="toggleApiKeyModal()" class="text-appMuted hover:text-appText p-1">
+            <span class="material-symbols-outlined text-lg">close</span>
+          </button>
+        </div>
+        <p class="text-xs text-appMuted leading-relaxed">
+          Google Gemini API anahtarınızı girerseniz Sokratik AI Tutor canlı Gemini API'ye bağlanır. Boş bırakırsanız dahili sokratik soru motoru devrede kalır.
+        </p>
+        <input type="password" id="geminiApiKeyInput" data-cy="gemini-api-key-input" placeholder="AIzaSy..." class="w-full bg-appBg text-xs p-3 rounded-xl border border-appBorder text-appText focus:outline-none focus:border-[#FFE600]">
+        <div class="flex gap-2 justify-end pt-2">
+          <button data-cy="api-key-save-btn" onclick="saveApiKey()" class="px-4 py-2 app-main-btn font-black text-xs rounded-xl active:scale-95 transition-all">
+            Kaydet & Kapat
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- EKRAN 1: GİRİŞ (DURUM: Giris)                            -->
+    <!-- ======================================================== -->
+    <section id="screen-giris" data-cy="screen-giris" class="screen-fade flex flex-col flex-1 justify-between pb-2">
+      <div class="flex flex-col gap-3">
+        
+        <!-- Hero Banner -->
+        <div class="relative overflow-hidden rounded-2xl bg-appSurface border border-appBorder p-4 shadow-lg">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FFE600]/20 border border-[#FFE600]/40 text-[#FFE600] text-[10px] font-black tracking-wider uppercase mb-2">
+            <span class="material-symbols-outlined text-xs">local_hospital</span> ACİL SAĞLIK MİMARİSİ
+          </div>
+          <h1 class="text-2xl font-black tracking-tight text-appText leading-tight">
+            08:00, Randevu Sistemi Çöktü
+          </h1>
+          <p class="text-xs text-appMuted mt-1 leading-relaxed">
+            300 hasta kapıda, veritabanı kilit. Kriz masasında kararlarını vermeden önce profilini belirle.
+          </p>
+
+          <!-- Animasyonlu Nabız Çizgisi -->
+          <div class="mt-3 pt-2.5 border-t border-appBorder flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <svg class="w-20 h-5" viewBox="0 0 100 24">
+                <path d="M0,12 L30,12 L35,4 L40,20 L45,2 L50,18 L55,12 L100,12" fill="none" stroke="#FFE600" stroke-width="2.2" class="ekg-line"></path>
+              </svg>
+              <span class="text-[10px] font-mono font-bold text-[#FFE600] animate-pulse">SİSTEM_NABZI: KRİTİK</span>
+            </div>
+            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-appBg border border-appBorder text-appMint">v2.4.0</span>
+          </div>
+        </div>
+
+        <!-- 3 Zorunlu Soru Alanı -->
+        <div class="flex flex-col gap-2.5">
+
+          <!-- 01 Seviyen -->
+          <div id="wrapper-level" data-cy="question-level-wrapper" class="p-3 rounded-xl bg-appSurface border border-appBorder transition-all">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-black tracking-wider text-[#FFE600] uppercase flex items-center gap-1.5">
+                <span class="w-4 h-4 rounded bg-appBg border border-appBorder flex items-center justify-center text-[10px] font-mono text-[#FFE600]">1</span>
+                Seviyen?
+              </span>
+              <span id="badge-level" data-cy="badge-level" class="text-[10px] text-appMuted font-mono">Zorunlu</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2" role="radiogroup">
+              <button type="button" data-cy="level-beginner" onclick="selectProfile('level', 'beginner', this)" class="btn-profile-opt min-h-[46px] px-3 py-2 rounded-xl border border-appBorder bg-appBg text-left text-xs font-bold flex items-center justify-between transition-all active:scale-[0.98]">
+                <span>Yeni başladım</span>
+                <span class="material-symbols-outlined text-sm opacity-40">radio_button_unchecked</span>
+              </button>
+              <button type="button" data-cy="level-experienced" onclick="selectProfile('level', 'experienced', this)" class="btn-profile-opt min-h-[46px] px-3 py-2 rounded-xl border border-appBorder bg-appBg text-left text-xs font-bold flex items-center justify-between transition-all active:scale-[0.98]">
+                <span>Deneyimliyim</span>
+                <span class="material-symbols-outlined text-sm opacity-40">radio_button_unchecked</span>
+              </button>
+            </div>
+            <p id="error-level" data-cy="error-level" class="text-[11px] text-appMercan mt-1.5 hidden flex items-center gap-1 font-semibold">
+              <span class="material-symbols-outlined text-xs">warning</span> Lütfen deneyim seviyeni belirle.
+            </p>
+          </div>
+
+          <!-- 02 Rolün -->
+          <div id="wrapper-role" data-cy="question-role-wrapper" class="p-3 rounded-xl bg-appSurface border border-appBorder transition-all">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-black tracking-wider text-[#FFE600] uppercase flex items-center gap-1.5">
+                <span class="w-4 h-4 rounded bg-appBg border border-appBorder flex items-center justify-center text-[10px] font-mono text-[#FFE600]">2</span>
+                Rolün?
+              </span>
+              <span id="badge-role" data-cy="badge-role" class="text-[10px] text-appMuted font-mono">Zorunlu</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2" role="radiogroup">
+              <button type="button" data-cy="role-dev" onclick="selectProfile('role', 'dev', this)" class="btn-profile-opt min-h-[46px] p-2 rounded-xl border border-appBorder bg-appBg text-center text-xs font-bold flex flex-col items-center justify-center gap-0.5 transition-all active:scale-[0.98]">
+                <span class="material-symbols-outlined text-sm text-[#FFE600]">code</span>
+                <span class="text-[11px]">Geliştirici</span>
+              </button>
+              <button type="button" data-cy="role-qa" onclick="selectProfile('role', 'qa', this)" class="btn-profile-opt min-h-[46px] p-2 rounded-xl border border-appBorder bg-appBg text-center text-xs font-bold flex flex-col items-center justify-center gap-0.5 transition-all active:scale-[0.98]">
+                <span class="material-symbols-outlined text-sm text-appMint">bug_report</span>
+                <span class="text-[11px]">Testçi (QA)</span>
+              </button>
+              <button type="button" data-cy="role-manager" onclick="selectProfile('role', 'manager', this)" class="btn-profile-opt min-h-[46px] p-2 rounded-xl border border-appBorder bg-appBg text-center text-xs font-bold flex flex-col items-center justify-center gap-0.5 transition-all active:scale-[0.98]">
+                <span class="material-symbols-outlined text-sm text-[#FFE600]">account_tree</span>
+                <span class="text-[11px]">Yönetici</span>
+              </button>
+            </div>
+            <p id="error-role" data-cy="error-role" class="text-[11px] text-appMercan mt-1.5 hidden flex items-center gap-1 font-semibold">
+              <span class="material-symbols-outlined text-xs">warning</span> Lütfen nöbetteki rolünü seç.
+            </p>
+          </div>
+
+          <!-- 03 Hedefin -->
+          <div id="wrapper-goal" data-cy="question-goal-wrapper" class="p-3 rounded-xl bg-appSurface border border-appBorder transition-all">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-black tracking-wider text-[#FFE600] uppercase flex items-center gap-1.5">
+                <span class="w-4 h-4 rounded bg-appBg border border-appBorder flex items-center justify-center text-[10px] font-mono text-[#FFE600]">3</span>
+                Hedefin?
+              </span>
+              <span id="badge-goal" data-cy="badge-goal" class="text-[10px] text-appMuted font-mono">Zorunlu</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2" role="radiogroup">
+              <button type="button" data-cy="goal-exam" onclick="selectProfile('goal', 'exam', this)" class="btn-profile-opt min-h-[46px] p-2 rounded-xl border border-appBorder bg-appBg text-center text-xs font-bold flex flex-col items-center justify-center gap-0.5 transition-all active:scale-[0.98]">
+                <span class="material-symbols-outlined text-sm text-appMuted">school</span>
+                <span class="text-[11px]">Sınav</span>
+              </button>
+              <button type="button" data-cy="goal-career" onclick="selectProfile('goal', 'career', this)" class="btn-profile-opt min-h-[46px] p-2 rounded-xl border border-appBorder bg-appBg text-center text-xs font-bold flex flex-col items-center justify-center gap-0.5 transition-all active:scale-[0.98]">
+                <span class="material-symbols-outlined text-sm text-appMuted">trending_up</span>
+                <span class="text-[11px]">Kariyer</span>
+              </button>
+              <button type="button" data-cy="goal-curiosity" onclick="selectProfile('goal', 'curiosity', this)" class="btn-profile-opt min-h-[46px] p-2 rounded-xl border border-appBorder bg-appBg text-center text-xs font-bold flex flex-col items-center justify-center gap-0.5 transition-all active:scale-[0.98]">
+                <span class="material-symbols-outlined text-sm text-appMuted">lightbulb</span>
+                <span class="text-[11px]">Merak</span>
+              </button>
+            </div>
+            <p id="error-goal" data-cy="error-goal" class="text-[11px] text-appMercan mt-1.5 hidden flex items-center gap-1 font-semibold">
+              <span class="material-symbols-outlined text-xs">warning</span> Lütfen hedefini belirle.
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Başla Butonu (data-cy="start") -->
+      <div class="mt-4 pt-1">
+        <button type="button" id="startBtn" data-cy="start" onclick="handleStartGame()" class="w-full min-h-[52px] app-main-btn font-black text-sm rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-lg">
+          <span>Kriz Odasına Giriş Yap</span>
+          <span class="material-symbols-outlined text-lg">bolt</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- EKRAN 2: KRİZ BRİFİNGİ (DURUM: Kriz)                     -->
+    <!-- ======================================================== -->
+    <section id="screen-kriz" data-cy="screen-kriz" class="screen-fade hidden flex flex-col flex-1 justify-between pb-2">
+      <div class="flex flex-col gap-3.5">
+        
+        <!-- P0 Kriz Bandı -->
+        <div class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-appMercan/20 border border-appMercan/50 text-appMercan shadow-glow-mercan">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-appMercan animate-ping"></span>
+            <span class="text-xs font-black tracking-wider uppercase">ACİL MÜDAHALE · P0 ÇÖKÜŞ</span>
+          </div>
+          <span class="text-[11px] font-mono font-bold">08:00 TSİ</span>
+        </div>
+
+        <!-- Brifing Kartı -->
+        <div class="bg-appSurface border border-appBorder rounded-2xl p-4 flex flex-col gap-3 shadow-xl">
+          <div class="flex items-center justify-between border-b border-appBorder pb-2">
+            <span class="text-xs font-black text-[#FFE600] flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">domain</span> Şehir Hastanesi Bilgi İşlem
+            </span>
+            <span class="text-[10px] font-mono text-appMuted bg-appBg px-2 py-0.5 rounded border border-appBorder">INC-9102</span>
+          </div>
+
+          <h2 class="text-base font-extrabold text-appText leading-snug">
+            "Randevu servisi HTTP 503 veriyor. Kapıda 300 hasta onay bekliyor!"
+          </h2>
+
+          <p id="kriz-personalized-text" data-cy="kriz-briefing-text" class="text-xs text-appMuted leading-relaxed">
+            Dün gece v2.4.0 dağıtımı canlıya alındı. Saat tam 08:00'de poliklinik bankoları açıldığı an veritabanı bağlantı havuzu (connection pool) tükendi. Nöbetçi mühendis sensin.
+          </p>
+
+          <div class="grid grid-cols-2 gap-2 mt-1">
+            <div class="bg-appBg p-2.5 rounded-xl border border-appBorder flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-appMercan/15 text-appMercan flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-base">group</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-[10px] text-appMuted">Kuyruk</span>
+                <span class="text-xs font-black text-appText">300+ Hasta</span>
+              </div>
+            </div>
+            <div class="bg-appBg p-2.5 rounded-xl border border-appBorder flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-[#FFE600]/20 text-[#FFE600] flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-base">timer</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-[10px] text-appMuted">SLA Limiti</span>
+                <span class="text-xs font-black text-[#FFE600]">&lt; 15 Dakika</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-appSurface/80 rounded-xl p-3 border border-appBorder flex items-start gap-2.5">
+          <span class="material-symbols-outlined text-[#FFE600] text-base mt-0.5">assignment_turned_in</span>
+          <div class="text-[11px] text-appMuted leading-relaxed">
+            <strong class="text-appText block mb-0.5">Kriz Kuralı:</strong>
+            3 ardışık kararla sistemi kurtaracaksın. Her seçimin sonuçları ("ne oldu / neden oldu") anında işletilecektir.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Kriz Devam Butonu (data-cy="kriz-continue") -->
+      <div class="mt-4 pt-1">
+        <button type="button" id="krizContinueBtn" data-cy="kriz-continue" onclick="startDecisionFlow()" class="w-full min-h-[52px] app-main-btn font-black text-sm rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-lg">
+          <span>Operasyonu Başlat</span>
+          <span class="material-symbols-outlined text-lg">arrow_forward</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- EKRAN 3: KARAR EKRANI (DURUM: Karar1, Karar2, Karar3)    -->
+    <!-- ======================================================== -->
+    <section id="screen-decision" data-cy="screen-decision" class="screen-fade hidden flex flex-col flex-1 pb-2">
+      
+      <!-- Stepper & Timer/Hint Header Bar -->
+      <div class="flex items-center justify-between py-2 border-b border-appBorder mb-3">
+        
+        <!-- 3 Noktalı Gösterge -->
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5" id="step-dots-container" data-cy="step-dots">
+            <div id="dot-1" class="w-6 h-2 rounded-full bg-[#FFE600] transition-all shadow-glow-yellow"></div>
+            <div id="dot-2" class="w-2.5 h-2 rounded-full bg-appSurfaceHigh transition-all"></div>
+            <div id="dot-3" class="w-2.5 h-2 rounded-full bg-appSurfaceHigh transition-all"></div>
+          </div>
+          <span id="decision-step-label" data-cy="decision-step-label" class="text-xs font-black text-appMuted uppercase tracking-wider ml-1">
+            Karar 1/3
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- 60 sn Geri Sayım ("Deneyimliyim") -->
+          <div id="timer-badge" data-cy="timer" class="hidden items-center gap-1.5 px-3 py-1 rounded-full bg-appSurface text-[#FFE600] border border-appBorder shadow-sm">
+            <svg class="w-4 h-4 -rotate-90" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" fill="none" r="14" stroke="#1E3574" stroke-width="3"></circle>
+              <circle id="timer-ring" cx="18" cy="18" fill="none" r="14" stroke="#FFE600" stroke-dasharray="88" stroke-dashoffset="0" stroke-linecap="round" stroke-width="3"></circle>
+            </svg>
+            <span id="timer-seconds" data-cy="timer-seconds" class="text-xs font-mono font-black text-appText">60s</span>
+          </div>
+
+          <!-- İpucu Butonu ("Yeni başladım") -->
+          <button type="button" id="hint-button" data-cy="hint-button" onclick="toggleHint()" class="hidden items-center gap-1 px-3 py-1 rounded-full bg-[#FFE600]/20 text-[#FFE600] text-xs font-black border border-[#FFE600]/40 active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-sm">lightbulb</span>
+            <span>İpucu</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Sahne Kartı -->
+      <div class="bg-appSurface border border-appBorder rounded-2xl p-4 flex flex-col gap-2 relative overflow-hidden shadow-lg" data-cy="scene-card">
+        <div class="flex items-center justify-between">
+          <span id="scene-topic-badge" data-cy="scene-topic" class="text-[10px] font-black tracking-widest uppercase text-[#FFE600] bg-[#FFE600]/15 px-2 py-0.5 rounded border border-[#FFE600]/30">
+            KARAR 1 · MİMARİ
+          </span>
+          <span class="text-[11px] text-appMuted flex items-center gap-1 font-mono">
+            <span class="material-symbols-outlined text-xs">schedule</span> 08:05
+          </span>
+        </div>
+
+        <h2 id="scene-title" data-cy="scene-title" class="text-sm font-black text-appText leading-snug">
+          Randevu servisi çöktü. Ne yapacaksın?
+        </h2>
+
+        <p id="scene-description" data-cy="scene-description" class="text-xs text-appMuted leading-relaxed">
+          v2.4.0 sürümü sonrası veritabanı bağlantı havuzu tükendi. 300 hasta gişede bekliyor.
+        </p>
+
+        <!-- Açılabilir İpucu Alanı (Yeni Başladım) -->
+        <div id="hint-content" data-cy="hint-content" class="hidden mt-2 p-3 rounded-xl bg-appBg border border-[#FFE600]/50 text-xs text-appMuted flex items-start gap-2 shadow-inner">
+          <span class="material-symbols-outlined text-[#FFE600] text-base mt-0.5">tips_and_updates</span>
+          <div>
+            <span class="font-bold text-[#FFE600] block mb-0.5">Kritik Mühendislik İpucu:</span>
+            <span id="hint-text">Geri dönmeden önce veritabanında geriye dönük uyumsuz bir şema göçü (migration) olup olmadığını kontrol et.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seçenek Kartları (A / B) - Lacivert & Canlı Sarı Uyumlu -->
+      <div class="flex flex-col gap-2.5 mt-3" id="choices-container" data-cy="choices-container">
+        
+        <!-- Seçenek A (data-cy="choice-a") -->
+        <button type="button" id="btn-choice-a" data-cy="choice-a" onclick="handleMakeChoice('A')" class="app-choice-card w-full min-h-[58px] p-3 rounded-xl text-left flex items-center justify-between active:scale-[0.98] transition-all shadow-sm">
+          <div class="flex items-center gap-3">
+            <span class="choice-tag w-8 h-8 rounded-lg bg-black/20 border border-white/20 flex items-center justify-center font-black text-xs text-[#FFE600] shrink-0">
+              A
+            </span>
+            <div class="flex flex-col">
+              <span id="choice-a-title" data-cy="choice-a-title" class="text-xs font-bold text-white">Eski sürüme geri dön</span>
+              <span id="choice-a-sub" data-cy="choice-a-sub" class="text-[11px] text-white/70">v2.3.9 stabil imajına anında rollback başlat</span>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-white/60 text-base">chevron_right</span>
+        </button>
+
+        <!-- Seçenek B (data-cy="choice-b") -->
+        <button type="button" id="btn-choice-b" data-cy="choice-b" onclick="handleMakeChoice('B')" class="app-choice-card w-full min-h-[58px] p-3 rounded-xl text-left flex items-center justify-between active:scale-[0.98] transition-all shadow-sm">
+          <div class="flex items-center gap-3">
+            <span class="choice-tag w-8 h-8 rounded-lg bg-black/20 border border-white/20 flex items-center justify-center font-black text-xs text-[#FFE600] shrink-0">
+              B
+            </span>
+            <div class="flex flex-col">
+              <span id="choice-b-title" data-cy="choice-b-title" class="text-xs font-bold text-white">Canlıda yama yap</span>
+              <span id="choice-b-sub" data-cy="choice-b-sub" class="text-[11px] text-white/70">Konteyner havuz limitini SSH ile sıcak güncelle</span>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-white/60 text-base">chevron_right</span>
+        </button>
+
+      </div>
+
+      <!-- SONUÇ PANELİ (NE OLDU / NEDEN OLDU) -->
+      <div id="result-panel" data-cy="result-panel" class="hidden mt-3 p-4 rounded-xl bg-appSurface border border-appBorder relative overflow-hidden screen-fade shadow-xl">
+        <div id="result-status-bar" data-cy="result-status-bar" class="absolute left-0 top-0 bottom-0 w-1.5 bg-appMint"></div>
+
+        <div class="pl-2 flex flex-col gap-2.5">
+          
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span id="result-status-icon" class="material-symbols-outlined text-lg text-appMint">check_circle</span>
+              <span id="result-status-title" data-cy="result-status-title" class="text-xs font-black uppercase tracking-wider text-appMint">
+                Doğru Karar · Hizmet Kurtarıldı
+              </span>
+            </div>
+            <!-- TP Rozeti -->
+            <span id="result-xp-badge" class="text-[10px] font-black px-2 py-0.5 rounded-full bg-appMint/20 text-appMint animate-bounce border border-appMint/30">
+              +100 TP
+            </span>
+          </div>
+
+          <!-- Ne Oldu -->
+          <div class="flex flex-col gap-0.5 bg-appBg/80 p-2.5 rounded-lg border border-appBorder">
+            <span class="text-[10px] font-black text-[#FFE600] flex items-center gap-1">
+              <span class="material-symbols-outlined text-xs">visibility</span> Ne oldu?
+            </span>
+            <p id="result-what-happened" data-cy="result-what-happened" class="text-xs text-appText leading-relaxed">
+              Sistem güvenli biçimde önceki sürüme çekildi ve randevu servisi 3 dakika içinde ayağa kalktı.
+            </p>
+          </div>
+
+          <!-- Neden Oldu -->
+          <div class="flex flex-col gap-0.5 bg-appBg/80 p-2.5 rounded-lg border border-appBorder">
+            <span class="text-[10px] font-black text-appMuted flex items-center gap-1">
+              <span class="material-symbols-outlined text-xs">psychology</span> Neden oldu?
+            </span>
+            <p id="result-why-happened" data-cy="result-why-happened" class="text-xs text-appMuted leading-relaxed">
+              Kriz anında canlıda plansız yama yapmak öngörülemeyen çöküşlere neden olabilir. Rollback en güvenli ilk reflekstir.
+            </p>
+          </div>
+
+          <!-- Devam Butonu (data-cy="continue-button") -->
+          <div class="pt-1">
+            <button type="button" id="continue-button" data-cy="continue-button" onclick="handleContinueNextStep()" class="w-full min-h-[46px] app-main-btn font-black text-xs rounded-xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md">
+              <span id="continue-btn-text">Sonraki Karara Geç</span>
+              <span class="material-symbols-outlined text-base">arrow_forward</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- AI SOKRATİK TUTOR BÖLÜMÜ -->
+      <div id="tutor-section" data-cy="tutor-section" class="mt-3 p-3 rounded-2xl bg-appSurface border border-appBorder flex flex-col gap-2.5 shadow-md">
+        
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-[#FFE600] text-appText flex items-center justify-center font-black shadow-sm">
+              <span class="material-symbols-outlined text-base">smart_toy</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-xs font-black text-appText flex items-center gap-1">
+                AI Tutor <span class="w-1.5 h-1.5 rounded-full bg-appMint animate-pulse"></span>
+              </span>
+              <span class="text-[9px] text-appMuted">Sokratik Kriz Rehberi</span>
+            </div>
+          </div>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-appBg text-[#FFE600] border border-appBorder font-bold">Aktif</span>
+        </div>
+
+        <!-- Chat Balonu (data-cy="tutor-bubble") -->
+        <div class="bg-appBg border border-appBorder rounded-xl p-3 flex flex-col gap-1 shadow-inner" id="tutor-bubble" data-cy="tutor-bubble">
+          <div class="flex items-center justify-between">
+            <span class="text-[9px] uppercase font-black text-[#FFE600] flex items-center gap-1">
+              <span class="material-symbols-outlined text-[13px]">psychology</span> Düşündürücü Soru
+            </span>
+            <span id="tutor-indicator" data-cy="tutor-loading" class="hidden text-[10px] text-[#FFE600] flex items-center gap-1">
+              <span class="dot-flashing"></span>
+              <span class="dot-flashing"></span>
+              <span class="dot-flashing"></span>
+            </span>
+          </div>
+          <p id="tutor-question-text" data-cy="tutor-question" class="text-xs text-appText leading-relaxed">
+            "Geri dönmeden önce veritabanı şemasının değişip değişmediğini nasıl anlarsın?"
+          </p>
+        </div>
+
+        <!-- Chat Input Formu -->
+        <form id="tutor-form" data-cy="tutor-form" onsubmit="handleTutorMessage(event)" class="flex items-center gap-2">
+          <input type="text" id="tutor-input" data-cy="tutor-input" placeholder="Tutor'a sor veya fikrini yaz..." class="flex-1 bg-appBg text-xs text-appText px-3 py-2.5 rounded-xl border border-appBorder focus:outline-none focus:border-[#FFE600] transition-colors placeholder:text-appMuted/60">
+          <button type="submit" id="tutor-send" data-cy="tutor-send" class="min-h-[42px] px-3.5 app-main-btn rounded-xl font-black flex items-center justify-center active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-base">send</span>
+          </button>
+        </form>
+
+      </div>
+
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- EKRAN 4: SON A - BAŞARILI (DURUM: SonA)                  -->
+    <!-- ======================================================== -->
+    <section id="screen-son-a" data-cy="screen-son-a" class="screen-fade hidden flex flex-col flex-1 justify-between pb-2">
+      <div class="flex flex-col gap-3.5">
+        
+        <div class="flex items-center justify-between">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-appMint/20 text-appMint text-xs font-black border border-appMint/40 shadow-glow-mint">
+            <span class="material-symbols-outlined text-sm">military_tech</span>
+            <span>KUSURSUZ OPERASYON</span>
+          </div>
+          <span class="text-xs font-mono text-appMint font-black bg-appMint/10 px-2 py-0.5 rounded border border-appMint/20">3/3 BAŞARI</span>
+        </div>
+
+        <div class="relative overflow-hidden rounded-2xl bg-appSurface border border-appBorder p-4 shadow-xl">
+          <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-appMint"></div>
+          <div class="pl-2">
+            <span class="text-[10px] font-black text-appMint tracking-widest uppercase">MİSYON TAMAMLANDI</span>
+            <h1 class="text-xl font-black text-appText mt-0.5" id="ending-a" data-cy="ending-a">
+              SON A · 08:25, Sistem Ayakta, Veri Güvende
+            </h1>
+            <p class="text-xs text-appMuted mt-1.5 leading-relaxed">
+              Kriz protokolü hatasız uygulandı. Sıfır veri kaybı sağlandı, hasta hakları korundu ve 300 vatandaşın randevu akışı başarıyla normale döndü.
+            </p>
+          </div>
+        </div>
+
+        <!-- Karar Özeti Listesi -->
+        <div class="flex flex-col gap-2" data-cy="summary-list-a">
+          <span class="text-xs font-black text-appMuted uppercase tracking-wider px-1">Uygulanan Karar Protokolü</span>
+          
+          <div class="p-3 rounded-xl bg-appSurface border border-appBorder flex items-start gap-3" data-cy="summary-item-1">
+            <span class="material-symbols-outlined text-appMint text-lg mt-0.5">verified</span>
+            <div class="text-xs">
+              <strong class="text-appText block font-bold">1. Karar: Eski sürüme geri dönüldü</strong>
+              <span class="text-appMuted">Canlıda plansız yama riski yerine stabil sürüme dönülerek yangın söndürüldü.</span>
+            </div>
+          </div>
+
+          <div class="p-3 rounded-xl bg-appSurface border border-appBorder flex items-start gap-3" data-cy="summary-item-2">
+            <span class="material-symbols-outlined text-appMint text-lg mt-0.5">verified</span>
+            <div class="text-xs">
+              <strong class="text-appText block font-bold">2. Karar: Önce kısa test koşuldu</strong>
+              <span class="text-appMuted">Kritik duman testi ile hasta kayıt akışının doğruluğu tescillendi.</span>
+            </div>
+          </div>
+
+          <div class="p-3 rounded-xl bg-appSurface border border-appBorder flex items-start gap-3" data-cy="summary-item-3">
+            <span class="material-symbols-outlined text-appMint text-lg mt-0.5">verified</span>
+            <div class="text-xs">
+              <strong class="text-appText block font-bold">3. Karar: Hasta verileri maskelendi</strong>
+              <span class="text-appMuted">Kriz anında bile kişisel sağlık verileri kanuna uygun korundu.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-appSurface border border-appBorder flex items-start gap-2.5">
+          <span class="material-symbols-outlined text-[#FFE600] text-base mt-0.5">psychology</span>
+          <p class="text-xs text-appMuted leading-relaxed">
+            <strong class="text-[#FFE600] block">Temel Mühendislik Prensibi:</strong>
+            Kriz anında kahramanlık değil; öngörülebilir, test edilebilir ve regülasyona saygılı adımlar hayat kurtarır.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Tekrar Oyna (data-cy="restart-button") -->
+      <div class="mt-4 pt-1">
+        <button type="button" data-cy="restart-button" onclick="restartSimulation()" class="w-full min-h-[50px] app-main-btn font-black text-sm rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-md">
+          <span class="material-symbols-outlined text-lg">replay</span>
+          <span>Simülasyonu Tekrar Oyna</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- EKRAN 5: SON B - RİSKLİ/KÖTÜ (DURUM: SonB)              -->
+    <!-- ======================================================== -->
+    <section id="screen-son-b" data-cy="screen-son-b" class="screen-fade hidden flex flex-col flex-1 justify-between pb-2">
+      <div class="flex flex-col gap-3.5">
+        
+        <div class="flex items-center justify-between">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-appMercan/20 text-appMercan text-xs font-black border border-appMercan/40 shadow-glow-mercan">
+            <span class="material-symbols-outlined text-sm">warning</span>
+            <span>RİSKLİ MÜDAHALE RAPORU</span>
+          </div>
+          <span id="son-b-score-badge" data-cy="son-b-score-badge" class="text-xs font-mono text-appMercan font-black bg-appMercan/10 px-2 py-0.5 rounded border border-appMercan/20">1 HATA</span>
+        </div>
+
+        <div class="relative overflow-hidden rounded-2xl bg-appSurface border border-appBorder p-4 shadow-xl">
+          <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-appMercan"></div>
+          <div class="pl-2">
+            <span class="text-[10px] font-black text-appMercan tracking-widest uppercase">MÜDAHALE AKSADI</span>
+            <h1 class="text-xl font-black text-appText mt-0.5" id="ending-b" data-cy="ending-b">
+              SON B · Sistem Ayakta Fakat KVKK / Kesinti Riski Doğdu
+            </h1>
+            <p class="text-xs text-appMuted mt-1.5 leading-relaxed">
+              Sistem çalışıyor gibi görünüyor; ancak baskı altında verilen aceleci kararlar sebebiyle kurumsal ve cezai riskler doğdu.
+            </p>
+          </div>
+        </div>
+
+        <!-- Hatalı Kararların Gerekçeli Detayı -->
+        <div class="flex flex-col gap-2">
+          <span class="text-xs font-black text-appMercan uppercase tracking-wider px-1">Hatalı Kararlar ve Analizi</span>
+          
+          <div id="son-b-mistakes-list" data-cy="son-b-mistakes-list" class="flex flex-col gap-2">
+            <!-- Dinamik doldurulur -->
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-appMercan/10 border border-appMercan/30 flex items-start gap-2.5">
+          <span class="material-symbols-outlined text-appMercan text-base mt-0.5">gavel</span>
+          <p class="text-xs text-appMuted leading-relaxed">
+            <strong class="text-appMercan block">Post-Mortem Dersi:</strong>
+            Kesinti süresi telafi edilebilir; ancak canlıda plansız yama ve sızan kişisel veriler geri alınamaz kurumsal yıkım doğurur.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Tekrar Oyna (data-cy="restart-button") -->
+      <div class="mt-4 pt-1">
+        <button type="button" data-cy="restart-button" onclick="restartSimulation()" class="w-full min-h-[50px] app-main-btn font-black text-sm rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-md">
+          <span class="material-symbols-outlined text-lg">replay</span>
+          <span>Ders Al ve Tekrar Oyna</span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- SCRIPT MOTORU & TEMA & SES                               -->
+  <!-- ======================================================== -->
+  <script>
+    const SYSTEM_PROMPT = "You are a Socratic tutor. Never say which option is correct. Never write 'choose A' or 'choose B'. Ask exactly one guiding question per reply. If the player insists on the answer, politely refuse and ask a simpler question. Never ask for real personal data.";
+
+    // ----------------------------------------------------
+    // GECE / GÜNDÜZ MODU YÖNETİMİ
+    // ----------------------------------------------------
+    let currentTheme = localStorage.getItem('app_theme') || 'dark';
+
+    function initTheme() {
+      applyTheme(currentTheme);
+    }
+
+    function toggleTheme() {
+      playSfx('click');
+      currentTheme = (currentTheme === 'dark') ? 'light' : 'dark';
+      localStorage.setItem('app_theme', currentTheme);
+      applyTheme(currentTheme);
+    }
+
+    function applyTheme(theme) {
+      const themeIcon = document.getElementById('themeIcon');
+      if (theme === 'light') {
+        document.body.classList.add('theme-light');
+        document.documentElement.classList.remove('dark');
+        themeIcon.textContent = 'dark_mode';
+        themeIcon.title = 'Gece Moduna Geç';
+      } else {
+        document.body.classList.remove('theme-light');
+        document.documentElement.classList.add('dark');
+        themeIcon.textContent = 'light_mode';
+        themeIcon.title = 'Gündüz Moduna Geç';
+      }
+    }
+
+    // ----------------------------------------------------
+    // WEB AUDIO API SES MOTORU
+    // ----------------------------------------------------
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const icon = document.getElementById('soundIcon');
+      if (soundEnabled) {
+        icon.textContent = 'volume_up';
+        icon.classList.remove('opacity-40');
+        playTone(520, 'sine', 0.1);
+      } else {
+        icon.textContent = 'volume_off';
+        icon.classList.add('opacity-40');
+      }
+    }
+
+    function playTone(freq, type = 'sine', duration = 0.15, vol = 0.12) {
+      if (!soundEnabled) return;
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function playSfx(type) {
+      if (!soundEnabled) return;
+      if (type === 'click') {
+        playTone(600, 'triangle', 0.06, 0.08);
+      } else if (type === 'correct') {
+        playTone(523.25, 'sine', 0.12, 0.12);
+        setTimeout(() => playTone(659.25, 'sine', 0.16, 0.12), 100);
+        setTimeout(() => playTone(783.99, 'sine', 0.25, 0.14), 220);
+      } else if (type === 'wrong') {
+        playTone(220, 'sawtooth', 0.2, 0.12);
+        setTimeout(() => playTone(180, 'sawtooth', 0.25, 0.14), 120);
+      } else if (type === 'tick') {
+        playTone(880, 'sine', 0.04, 0.05);
+      } else if (type === 'fanfare') {
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((n, idx) => {
+          setTimeout(() => playTone(n, 'triangle', 0.22, 0.15), idx * 120);
+        });
+      }
+    }
+
+    // ----------------------------------------------------
+    // KONFETİ PATLAMASI (SON A)
+    // ----------------------------------------------------
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#FFE600', '#4ADE9A', '#FFFFFF', '#38BDF8', '#F472B6'];
+
+      for (let i = 0; i < 90; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height * 0.4,
+          r: Math.random() * 5 + 3,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 14,
+          vy: Math.random() * -12 - 4,
+          gravity: 0.35,
+          alpha: 1,
+          decay: Math.random() * 0.015 + 0.008
+        });
+      }
+
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let alive = false;
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += p.gravity;
+          p.alpha -= p.decay;
+
+          if (p.alpha > 0) {
+            alive = true;
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        });
+
+        if (alive) {
+          requestAnimationFrame(render);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      render();
+    }
+
+    // ----------------------------------------------------
+    // UYGULAMA DURUMU & SENARYO VERİLERİ
+    // ----------------------------------------------------
+    const appState = {
+      currentState: 'Giris',
+      profile: {
+        level: null,
+        role: null,
+        goal: null
+      },
+      currentDecisionIndex: 0,
+      answers: [],
+      timerInterval: null,
+      timeLeft: 60,
+      apiKey: localStorage.getItem('gemini_api_key') || ''
+    };
+
+    const decisionsData = [
+      {
+        id: 1,
+        topic: 'KARAR 1 · MİMARİ',
+        time: '08:05',
+        title: 'Randevu servisi üretimde çöktü. Müdahale refleksin ne olacak?',
+        desc: {
+          dev: 'v2.4.0 dağıtımı sonrası PostgreSQL connection pool tükendi. Canlı loglarda "too many clients" dönüyor.',
+          qa: 'Canlı ortama yeni çıkan sürüm regression oluşturdu. 300 hasta gişede bekliyor.',
+          manager: 'Kritik hasta kabul servisi SLA sınırını aştı. Kriz masasında ilk kararı vermen gerekiyor.'
+        },
+        optionA: {
+          title: 'Eski sürüme geri dön',
+          sub: 'v2.3.9 stabil imajına anında rollback başlat',
+          isCorrect: true,
+          what: 'Sistem 4 dakika içinde v2.3.9 kararlı sürümüne rollback edildi. Veritabanı bağlantı havuzu normale döndü ve 300 hastanın randevusu açıldı.',
+          why: 'Canlıda doğrudan kod yamamak (hotfix) test edilmemiş yeni yan etkilere yol açabilirdi. Rollback stratejisi kriz anında en güvenli mimari reflekstir.'
+        },
+        optionB: {
+          title: 'Canlıda yama yap',
+          sub: 'Konteyner havuz limitini SSH ile canlıda sıcak güncelle',
+          isCorrect: false,
+          what: 'SSH ile canlı yapılandırma güncellenirken bir konteyner crash oldu; veritabanı kilitlendi ve kesinti 25 dakika daha uzadı.',
+          why: 'Üretim ortamında acil sıcak yama yapmak mimari drift ve kontrolsüz yan etkilere yol açar. Test edilmemiş yama felaketi derinleştirir.'
+        },
+        hint: 'Geri dönmeden önce son sürümde veritabanı şema göçü (migration) olup olmadığını ve eski kodun bu şemayla uyumlu kalıp kalmadığını düşün.',
+        socraticQuestion: 'Geri dönmeden önce veritabanı şemasının değişip değişmediğini nasıl anlarsın?'
+      },
+      {
+        id: 2,
+        topic: 'KARAR 2 · TEST & DOĞRULAMA',
+        time: '08:12',
+        title: 'Rollback/düzeltme sonrası sistemi yayına nasıl alacaksın?',
+        desc: {
+          dev: 'Kod tabanı hazırlandı fakat acil durum testi koşulmalı mı yoksa saniyeler bile kıymetli mi?',
+          qa: 'Smoke test otomasyonunu 90 saniyede çalıştırabilirsin veya doğrudan prod trafiğine açabilirsin.',
+          manager: 'Yönetim bir an önce servisin yeşile dönmesini istiyor. Hız ile kalite dengesini kurmalısın.'
+        },
+        optionA: {
+          title: 'Önce kısa test koş',
+          sub: 'Canary / Staging üzerinde 60 saniyelik kritik smoke test yürüt',
+          isCorrect: true,
+          what: 'Kısa smoke test sayesinde poliklinik hekim randevu listeleme API\'sinin sorunsuz çalıştığı doğrulandıktan sonra trafik açıldı.',
+          why: 'Baskı altında dahi en temel 1-2 kritik akışı test etmek (smoke testing), düzeltmenin yeni bir çöküş yaratmadığından emin olmanın tek yoludur.'
+        },
+        optionB: {
+          title: 'Hemen yayına al',
+          sub: 'Test ile vakit kaybetmeden trafiği doğrudan içeri ver',
+          isCorrect: false,
+          what: 'Test edilmeden açılan serviste hekim yetkilendirme token hatası fark edilemedi; hastalar randevu ekranında beyaz ekranla karşılaştı.',
+          why: 'Kriz anında "zaman kazanmak" için test atlamak, gizli hataların canlıda 300 hasta üzerinde test edilmesine ve güven kaybına sebep olur.'
+        },
+        hint: 'En azından en kritik "randevu sorgulama" ve "onaylama" gibi birkaç temel akışın çalıştığını 1 dakikada doğrulamak sana ne kazandırır?',
+        socraticQuestion: 'Test yapmadan yayına aldığında ortaya çıkabilecek bir hatayı kullanıcıdan önce kim tespit edebilir?'
+      },
+      {
+        id: 3,
+        topic: 'KARAR 3 · KVKK & LOG GÜVENLİĞİ',
+        time: '08:18',
+        title: 'Hata ayıklamak için ortak Slack/kriz kanalına log aktaracaksın.',
+        desc: {
+          dev: 'Hatanın stack trace ve SQL kayıtlarında hastaların T.C. kimlik ve teşhis bilgileri görünüyor.',
+          qa: 'Paylaşacağın loglar tüm nöbetçi mühendis ve stajyerlerin görebileceği genel kanala gidecek.',
+          manager: 'Veri mahremiyeti ve kriz koordinasyonu arasında mevzuat riski var.'
+        },
+        optionA: {
+          title: 'Logdaki hasta adını ve T.C.\'yi maskele',
+          sub: 'Hassas PII alanlarını regex ile [MASKELENDİ] yaparak ilet',
+          isCorrect: true,
+          what: 'Loglardaki hassas kişisel sağlık ve kimlik verileri anında maskelenerek mühendislik ekibine iletildi. Hata hızla çözüldü ve KVKK korundu.',
+          why: 'Kriz ortamı dahi olsa sağlık ve kimlik verilerinin korunması kanuni zorunluluktur. Maskeleme hem sorunun görülmesini sağlar hem ihlali önler.'
+        },
+        optionB: {
+          title: 'Logu ekibe olduğu gibi ham at',
+          sub: 'Vakit kaybetmemek için tüm SQL ve hasta dökümünü kanala yapıştır',
+          isCorrect: false,
+          what: '300 hastanın adı, T.C. kimlik numarası ve muayene teşhisleri yetkisiz ortak kanalda depolandı. KVKK Madde 12 uyarınca resmi soruşturma başlatıldı.',
+          why: 'Operasyonel hız, hasta mahremiyetinin ve KVKK uyumluluğunun önüne konulamaz. Sızan kişisel veriler geri alınamaz cezai sonuçlar doğurur.'
+        },
+        hint: 'Teknik kök nedeni görmek için hastanın gerçek T.C. kimlik numarasına veya adına gerçekten ihtiyaç var mı?',
+        socraticQuestion: 'Bir hata analizinde mühendisin sistem parametreleri haricinde gerçek hasta kimliğine ihtiyacı var mıdır?'
+      }
+    ];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      updateApiKeyStatus();
+      renderState();
+    });
+
+    // Profil Seçimi & KÖ-1 Doğrulaması
+    function selectProfile(field, value, btnEl) {
+      playSfx('click');
+      appState.profile[field] = value;
+      
+      const parent = btnEl.parentElement;
+      const buttons = parent.querySelectorAll('.btn-profile-opt');
+      buttons.forEach(b => {
+        b.classList.remove('border-[#FFE600]', 'bg-[#FFE600]/15', 'shadow-glow-yellow');
+        b.classList.add('border-appBorder', 'bg-appBg');
+        const icon = b.querySelector('.material-symbols-outlined');
+        if (icon) {
+          icon.textContent = 'radio_button_unchecked';
+          icon.classList.remove('text-[#FFE600]');
+          icon.classList.add('opacity-40');
+        }
+      });
+
+      btnEl.classList.remove('border-appBorder');
+      btnEl.classList.add('border-[#FFE600]', 'bg-[#FFE600]/15', 'shadow-glow-yellow');
+      const activeIcon = btnEl.querySelector('.material-symbols-outlined');
+      if (activeIcon) {
+        activeIcon.textContent = 'check_circle';
+        activeIcon.classList.remove('opacity-40');
+        activeIcon.classList.add('text-[#FFE600]');
+      }
+
+      const errorEl = document.getElementById(`error-${field}`);
+      const wrapperEl = document.getElementById(`wrapper-${field}`);
+      if (errorEl) errorEl.classList.add('hidden');
+      if (wrapperEl) {
+        wrapperEl.classList.remove('border-appMercan');
+        wrapperEl.classList.add('border-appBorder');
+      }
+    }
+
+    function handleStartGame() {
+      playSfx('click');
+      let hasError = false;
+      const fields = ['level', 'role', 'goal'];
+      
+      fields.forEach(field => {
+        const errorEl = document.getElementById(`error-${field}`);
+        const wrapperEl = document.getElementById(`wrapper-${field}`);
+        if (!appState.profile[field]) {
+          hasError = true;
+          if (errorEl) errorEl.classList.remove('hidden');
+          if (wrapperEl) {
+            wrapperEl.classList.remove('border-appBorder');
+            wrapperEl.classList.add('border-appMercan');
+          }
+        } else {
+          if (errorEl) errorEl.classList.add('hidden');
+          if (wrapperEl) {
+            wrapperEl.classList.remove('border-appMercan');
+            wrapperEl.classList.add('border-appBorder');
+          }
+        }
+      });
+
+      if (hasError) {
+        playSfx('wrong');
+        return;
+      }
+
+      const pText = document.getElementById('kriz-personalized-text');
+      const role = appState.profile.role;
+      if (role === 'dev') {
+        pText.textContent = 'Dün gece v2.4.0 dağıtımı canlıya alındı. Saat 08:00\'de poliklinikler açıldığı an PostgreSQL connection pool tükendi ve servis çöktü. Geliştirici olarak terminal başındasın.';
+      } else if (role === 'qa') {
+        pText.textContent = 'Dün gece v2.4.0 dağıtımı canlıya alındı. Saat 08:00\'de regression patlak verdi ve 300 hasta gişede kaldı. Test mühendisi gözüyle riskleri denetleyerek müdahale et.';
+      } else {
+        pText.textContent = 'Dün gece v2.4.0 dağıtımı canlıya alındı. 300 hasta gişede bekliyor ve başhekimlik açıklama istiyor. Yönetici olarak servis sürekliliği ve KVKK dengesini kurmalısın.';
+      }
+
+      changeState('Kriz');
+    }
+
+    function startDecisionFlow() {
+      playSfx('click');
+      appState.currentDecisionIndex = 0;
+      appState.answers = [];
+      changeState('Karar1');
+    }
+
+    function changeState(newState) {
+      appState.currentState = newState;
+      renderState();
+    }
+
+    function renderState() {
+      const screens = ['screen-giris', 'screen-kriz', 'screen-decision', 'screen-son-a', 'screen-son-b'];
+      screens.forEach(s => {
+        const el = document.getElementById(s);
+        if (el) el.classList.add('hidden');
+      });
+
+      clearInterval(appState.timerInterval);
+
+      if (appState.currentState === 'Giris') {
+        document.getElementById('screen-giris').classList.remove('hidden');
+      } 
+      else if (appState.currentState === 'Kriz') {
+        document.getElementById('screen-kriz').classList.remove('hidden');
+      } 
+      else if (appState.currentState === 'Karar1' || appState.currentState === 'Karar2' || appState.currentState === 'Karar3') {
+        const screenDecision = document.getElementById('screen-decision');
+        screenDecision.classList.remove('hidden');
+        renderDecisionScreen();
+      } 
+      else if (appState.currentState === 'SonA') {
+        playSfx('fanfare');
+        launchConfetti();
+        document.getElementById('screen-son-a').classList.remove('hidden');
+      } 
+      else if (appState.currentState === 'SonB') {
+        playSfx('wrong');
+        renderSonBScreen();
+        document.getElementById('screen-son-b').classList.remove('hidden');
+      }
+    }
+
+    function renderDecisionScreen() {
+      const idx = appState.currentDecisionIndex;
+      const data = decisionsData[idx];
+      const role = appState.profile.role || 'dev';
+
+      document.getElementById('decision-step-label').textContent = `Karar ${idx + 1} / 3`;
+
+      for (let i = 1; i <= 3; i++) {
+        const dot = document.getElementById(`dot-${i}`);
+        if (i - 1 === idx) {
+          dot.className = 'w-6 h-2 rounded-full bg-[#FFE600] transition-all shadow-glow-yellow';
+        } else if (i - 1 < idx) {
+          dot.className = 'w-2.5 h-2 rounded-full bg-appMint transition-all';
+        } else {
+          dot.className = 'w-2.5 h-2 rounded-full bg-appSurfaceHigh transition-all';
+        }
+      }
+
+      document.getElementById('scene-topic-badge').textContent = data.topic;
+      document.getElementById('scene-title').textContent = data.title;
+      document.getElementById('scene-description').textContent = data.desc[role] || data.desc.dev;
+
+      document.getElementById('choice-a-title').textContent = data.optionA.title;
+      document.getElementById('choice-a-sub').textContent = data.optionA.sub;
+      document.getElementById('choice-b-title').textContent = data.optionB.title;
+      document.getElementById('choice-b-sub').textContent = data.optionB.sub;
+
+      const btnA = document.getElementById('btn-choice-a');
+      const btnB = document.getElementById('btn-choice-b');
+      btnA.disabled = false;
+      btnB.disabled = false;
+      resetChoiceButtonStyles(btnA, 'A');
+      resetChoiceButtonStyles(btnB, 'B');
+
+      document.getElementById('result-panel').classList.add('hidden');
+      document.getElementById('tutor-question-text').textContent = `"${data.socraticQuestion}"`;
+      document.getElementById('hint-text').textContent = data.hint;
+      document.getElementById('hint-content').classList.add('hidden');
+
+      const isBeginner = appState.profile.level === 'beginner';
+      const hintBtn = document.getElementById('hint-button');
+      const timerBadge = document.getElementById('timer-badge');
+
+      if (isBeginner) {
+        hintBtn.classList.remove('hidden');
+        hintBtn.classList.add('flex');
+        timerBadge.classList.add('hidden');
+        timerBadge.classList.remove('flex');
+      } else {
+        hintBtn.classList.add('hidden');
+        hintBtn.classList.remove('flex');
+        timerBadge.classList.remove('hidden');
+        timerBadge.classList.add('flex');
+        startTimer();
+      }
+    }
+
+    function resetChoiceButtonStyles(btn, key) {
+      btn.className = 'app-choice-card w-full min-h-[58px] p-3 rounded-xl text-left flex items-center justify-between active:scale-[0.98] transition-all shadow-sm opacity-100 cursor-pointer';
+      const tag = btn.querySelector('.choice-tag');
+      tag.className = 'choice-tag w-8 h-8 rounded-lg bg-black/20 border border-white/20 flex items-center justify-center font-black text-xs text-[#FFE600] shrink-0';
+      tag.textContent = key;
+    }
+
+    function startTimer() {
+      clearInterval(appState.timerInterval);
+      appState.timeLeft = 60;
+      updateTimerUI(60);
+
+      appState.timerInterval = setInterval(() => {
+        appState.timeLeft--;
+        updateTimerUI(appState.timeLeft);
+
+        if (appState.timeLeft <= 10 && appState.timeLeft > 0) {
+          playSfx('tick');
+        }
+
+        if (appState.timeLeft <= 0) {
+          clearInterval(appState.timerInterval);
+          handleTimeout();
+        }
+      }, 1000);
+    }
+
+    function updateTimerUI(seconds) {
+      const textEl = document.getElementById('timer-seconds');
+      const ringEl = document.getElementById('timer-ring');
+      const badgeEl = document.getElementById('timer-badge');
+
+      textEl.textContent = `${seconds}s`;
+      const offset = 88 - (seconds / 60) * 88;
+      ringEl.setAttribute('stroke-dashoffset', offset);
+
+      if (seconds <= 10) {
+        ringEl.setAttribute('stroke', '#FF6B5B');
+        badgeEl.classList.remove('border-appBorder');
+        badgeEl.classList.add('border-appMercan', 'text-appMercan', 'animate-pulse');
+      } else {
+        ringEl.setAttribute('stroke', '#FFE600');
+        badgeEl.classList.remove('border-appMercan', 'text-appMercan', 'animate-pulse');
+        badgeEl.classList.add('border-appBorder', 'text-[#FFE600]');
+      }
+    }
+
+    function handleTimeout() {
+      handleMakeChoice('TIMEOUT');
+    }
+
+    function toggleHint() {
+      playSfx('click');
+      const hintBox = document.getElementById('hint-content');
+      hintBox.classList.toggle('hidden');
+    }
+
+    function handleMakeChoice(choiceKey) {
+      clearInterval(appState.timerInterval);
+
+      const idx = appState.currentDecisionIndex;
+      const data = decisionsData[idx];
+
+      const btnA = document.getElementById('btn-choice-a');
+      const btnB = document.getElementById('btn-choice-b');
+      btnA.disabled = true;
+      btnB.disabled = true;
+
+      let isWrong = false;
+      let whatText = '';
+      let whyText = '';
+      let statusTitle = '';
+
+      if (choiceKey === 'A') {
+        isWrong = !data.optionA.isCorrect;
+        whatText = data.optionA.what;
+        whyText = data.optionA.why;
+        statusTitle = 'Doğru Karar · Hizmet Kurtarıldı';
+
+        btnA.classList.add('border-appMint', 'shadow-glow-mint');
+        btnB.classList.add('opacity-40');
+        playSfx('correct');
+      } 
+      else if (choiceKey === 'B') {
+        isWrong = !data.optionB.isCorrect;
+        whatText = data.optionB.what;
+        whyText = data.optionB.why;
+        statusTitle = 'Riskli Karar · Hata Gerçekleşti';
+
+        btnB.classList.add('border-appMercan', 'shadow-glow-mercan');
+        btnA.classList.add('opacity-40');
+        playSfx('wrong');
+      } 
+      else if (choiceKey === 'TIMEOUT') {
+        isWrong = true;
+        statusTitle = 'Süre Doldu · Müdahale Gecikti';
+        whatText = '60 saniye içinde karar verilemediği için randevu servisi askıda kaldı ve veritabanı bağlantıları kilitlendi.';
+        whyText = 'Kriz esnasında kararsızlık en kötü karardan daha fazla kayba yol açar. SLA süresi aşıldığı için müdahale başarısız sayıldı.';
+        btnA.classList.add('opacity-40');
+        btnB.classList.add('opacity-40');
+        playSfx('wrong');
+      }
+
+      appState.answers.push({
+        decisionIndex: idx,
+        choice: choiceKey,
+        isWrong: isWrong,
+        topic: data.topic,
+        title: data.title,
+        what: whatText,
+        why: whyText
+      });
+
+      const panel = document.getElementById('result-panel');
+      const statusBar = document.getElementById('result-status-bar');
+      const statusIcon = document.getElementById('result-status-icon');
+      const statusTitleEl = document.getElementById('result-status-title');
+      const whatEl = document.getElementById('result-what-happened');
+      const whyEl = document.getElementById('result-why-happened');
+      const continueBtnText = document.getElementById('continue-btn-text');
+      const xpBadge = document.getElementById('result-xp-badge');
+
+      whatEl.textContent = whatText;
+      whyEl.textContent = whyText;
+      statusTitleEl.textContent = statusTitle;
+
+      if (!isWrong) {
+        statusBar.className = 'absolute left-0 top-0 bottom-0 w-1.5 bg-appMint';
+        statusIcon.textContent = 'verified';
+        statusIcon.className = 'material-symbols-outlined text-lg text-appMint';
+        statusTitleEl.className = 'text-xs font-black uppercase tracking-wider text-appMint';
+        xpBadge.textContent = '+100 TP';
+        xpBadge.className = 'text-[10px] font-black px-2 py-0.5 rounded-full bg-appMint/20 text-appMint animate-bounce border border-appMint/40';
+      } else {
+        statusBar.className = 'absolute left-0 top-0 bottom-0 w-1.5 bg-appMercan';
+        statusIcon.textContent = 'warning';
+        statusIcon.className = 'material-symbols-outlined text-lg text-appMercan';
+        statusTitleEl.className = 'text-xs font-black uppercase tracking-wider text-appMercan';
+        xpBadge.textContent = '0 TP (Hata)';
+        xpBadge.className = 'text-[10px] font-black px-2 py-0.5 rounded-full bg-appMercan/20 text-appMercan border border-appMercan/40';
+      }
+
+      continueBtnText.textContent = idx === 2 ? 'Nihai Raporu Gör' : 'Sonraki Karara Geç';
+      panel.classList.remove('hidden');
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function handleContinueNextStep() {
+      playSfx('click');
+      if (appState.currentDecisionIndex < 2) {
+        appState.currentDecisionIndex++;
+        const nextState = `Karar${appState.currentDecisionIndex + 1}`;
+        changeState(nextState);
+      } else {
+        const wrongCount = appState.answers.filter(a => a.isWrong).length;
+        if (wrongCount === 0) {
+          changeState('SonA');
+        } else {
+          changeState('SonB');
+        }
+      }
+    }
+
+    function renderSonBScreen() {
+      const mistakesContainer = document.getElementById('son-b-mistakes-list');
+      mistakesContainer.innerHTML = '';
+
+      const wrongAnswers = appState.answers.filter(a => a.isWrong);
+      document.getElementById('son-b-score-badge').textContent = `${wrongAnswers.length} HATA / 3 KARAR`;
+
+      appState.answers.forEach((ans, i) => {
+        const item = document.createElement('div');
+        item.setAttribute('data-cy', `mistake-item-${i + 1}`);
+        if (ans.isWrong) {
+          item.className = 'p-3 rounded-xl bg-appSurface border border-appMercan/60 flex items-start gap-3 shadow-md';
+          item.innerHTML = `
+            <span class="material-symbols-outlined text-appMercan text-lg mt-0.5">error</span>
+            <div class="text-xs">
+              <strong class="text-appText block font-bold">Karar ${i + 1}: ${ans.choice === 'TIMEOUT' ? 'Süre Doldu' : 'Riskli Tercih'}</strong>
+              <p class="text-appMuted mt-0.5"><span class="text-appMercan font-semibold">Hata Sebebi:</span> ${ans.why}</p>
+            </div>
+          `;
+        } else {
+          item.className = 'p-3 rounded-xl bg-appSurface border border-appBorder flex items-start gap-3 opacity-80';
+          item.innerHTML = `
+            <span class="material-symbols-outlined text-appMint text-lg mt-0.5">check_circle</span>
+            <div class="text-xs">
+              <strong class="text-appText block font-bold">Karar ${i + 1}: İsabetli Karar</strong>
+              <p class="text-appMuted mt-0.5">${ans.what}</p>
+            </div>
+          `;
+        }
+        mistakesContainer.appendChild(item);
+      });
+    }
+
+    function restartSimulation() {
+      playSfx('click');
+      appState.profile = { level: null, role: null, goal: null };
+      appState.currentDecisionIndex = 0;
+      appState.answers = [];
+      clearInterval(appState.timerInterval);
+
+      document.querySelectorAll('.btn-profile-opt').forEach(b => {
+        b.classList.remove('border-[#FFE600]', 'bg-[#FFE600]/15', 'shadow-glow-yellow');
+        b.classList.add('border-appBorder', 'bg-appBg');
+        const icon = b.querySelector('.material-symbols-outlined');
+        if (icon) {
+          icon.textContent = 'radio_button_unchecked';
+          icon.classList.remove('text-[#FFE600]');
+          icon.classList.add('opacity-40');
+        }
+      });
+
+      changeState('Giris');
+    }
+
+    // ----------------------------------------------------
+    // SOKRATİK AI TUTOR (GEMINI + YEREL MOTOR)
+    // ----------------------------------------------------
+    async function handleTutorMessage(e) {
+      e.preventDefault();
+      playSfx('click');
+      const input = document.getElementById('tutor-input');
+      const questionEl = document.getElementById('tutor-question-text');
+      const indicator = document.getElementById('tutor-indicator');
+      const userText = input.value.trim();
+
+      if (!userText) return;
+
+      input.value = '';
+      input.disabled = true;
+      indicator.classList.remove('hidden');
+
+      const currentDecision = decisionsData[appState.currentDecisionIndex];
+
+      if (appState.apiKey) {
+        try {
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(appState.apiKey)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [
+                {
+                  role: 'user',
+                  parts: [
+                    {
+                      text: `${SYSTEM_PROMPT}\n\nMevcut Kriz Durumu: "${currentDecision.topic} - ${currentDecision.title}".\nOyuncunun Mesajı: "${userText}".\nYalnızca Türkçe olarak tek bir yönlendirici Sokratik soru sor.`
+                    }
+                  ]
+                }
+              ]
+            })
+          });
+
+          const data = await response.json();
+          if (data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+            questionEl.textContent = `"${data.candidates[0].content.parts[0].text.trim()}"`;
+            indicator.classList.add('hidden');
+            input.disabled = false;
+            playSfx('correct');
+            return;
+          }
+        } catch (err) {
+          console.warn('Gemini API bağlantısı başarısız, yerel motor devrede:', err);
+        }
+      }
+
+      setTimeout(() => {
+        indicator.classList.add('hidden');
+        input.disabled = false;
+        questionEl.textContent = `"${generateLocalSocraticReply(userText, currentDecision.id)}"`;
+        playSfx('click');
+      }, 650);
+    }
+
+    function generateLocalSocraticReply(userText, decisionId) {
+      const lower = userText.toLowerCase();
+
+      if (lower.includes('cevap') || lower.includes('hangisi') || lower.includes('söyle') || lower.includes('a mı') || lower.includes('b mi')) {
+        return "Doğrudan cevabı veremem; fakat seni düşündürebilirim: İki seçenek arasında geri dönülemez bir risk taşıyan hangisi?";
+      }
+
+      if (decisionId === 1) {
+        if (lower.includes('şema') || lower.includes('migration') || lower.includes('db')) {
+          return "Şema farkını tespit ettiğinde, geriye dönük uyumsuz bir kolon değişikliği varsa rollback öncesinde ne yapmak gerekir?";
+        }
+        return "Geri dönmeden önce veritabanı şemasının değişip değişmediğini nasıl anlarsın?";
+      } 
+      else if (decisionId === 2) {
+        if (lower.includes('test') || lower.includes('vakit') || lower.includes('zaman')) {
+          return "Krizde 60 saniyelik bir smoke test ile kurtarılacak prestij arasındaki ilişkiyi nasıl değerlendirirsin?";
+        }
+        return "Sistemi test etmeden doğrudan yayına aldığında oluşabilecek yeni bir hatayı kim fark eder?";
+      } 
+      else {
+        if (lower.includes('kvkk') || lower.includes('hasta') || lower.includes('isim')) {
+          return "Bir yazılım mühendisi hatayı çözmek için gerçek bir hastanın kimliğine mi yoksa sadece logdaki hata izine (stack trace) mi ihtiyaç duyar?";
+        }
+        return "Kriz esnasında hız kazanmak adına hasta mahremiyetini hiçe saymanın doğuracağı hukuki sonuçları düşündün mü?";
+      }
+    }
+
+    function toggleApiKeyModal() {
+      playSfx('click');
+      const modal = document.getElementById('apiKeyModal');
+      const input = document.getElementById('geminiApiKeyInput');
+      input.value = appState.apiKey || '';
+      modal.classList.toggle('hidden');
+    }
+
+    function saveApiKey() {
+      playSfx('correct');
+      const input = document.getElementById('geminiApiKeyInput');
+      appState.apiKey = input.value.trim();
+      localStorage.setItem('gemini_api_key', appState.apiKey);
+      updateApiKeyStatus();
+      toggleApiKeyModal();
+    }
+
+    function updateApiKeyStatus() {
+      const statusText = document.getElementById('apiKeyStatusText');
+      if (appState.apiKey) {
+        statusText.textContent = 'Gemini';
+        statusText.classList.add('text-appMint');
+      } else {
+        statusText.textContent = 'API';
+        statusText.classList.remove('text-appMint');
+      }
+    }
+  </script>
+</body>
+</html>

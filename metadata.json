@@ -1,0 +1,8 @@
+{
+  "name": "SE Primer",
+  "description": "Hastane randevu sistemi çöküş simülasyonu. 300 hasta kapıda, kriz anında mimari ve operasyonel kararlar al, Sokratik AI Tutor ile sistem güvenliğini sağla.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
